@@ -1,68 +1,68 @@
-# Importação das bibliotecas necessárias
-import pandas as pd            # Biblioteca para manipulação de dados em dataframes
-import openpyxl                # Biblioteca para trabalhar com arquivos Excel
-import psycopg2                # Biblioteca para conectar e manipular bancos de dados PostgreSQL
-from datetime import datetime  # Biblioteca para trabalhar com datas e horas
-import os                      # Biblioteca para interagir com o sistema operacional
-import glob                    # Biblioteca para buscar arquivos com padrões especificados
-from googleapiclient.discovery import build   # Biblioteca para interagir com APIs do Google
-from google.oauth2.service_account import Credentials   # Biblioteca para autenticação com contas de serviço do Google
-from googleapiclient.http import MediaFileUpload  # Biblioteca para fazer upload de arquivos para o Google Drive
+# Import necessary libraries
+import pandas as pd            # Library for data manipulation in dataframes
+import openpyxl                # Library for working with Excel files
+import psycopg2                # Library for connecting to and manipulating PostgreSQL databases
+from datetime import datetime  # Library for working with dates and times
+import os                      # Library for interacting with the operating system
+import glob                    # Library for finding files with specified patterns
+from googleapiclient.discovery import build   # Library for interacting with Google APIs
+from google.oauth2.service_account import Credentials   # Library for authentication with Google service accounts
+from googleapiclient.http import MediaFileUpload  # Library for uploading files to Google Drive
 
-# Conexão com o banco de dados PostgreSQL
+# Connect to PostgreSQL database
 conn = psycopg2.connect(
-    # Aqui deveriam estar os parâmetros de conexão, como dbname, user, password, host, port
+    # Connection parameters should be specified here, such as dbname, user, password, host, port
 )
 
-cur = conn.cursor()  # Criação de um cursor para executar comandos SQL
-print("Conexão concluída")
+cur = conn.cursor()  # Create a cursor to execute SQL commands
+print("Connection established")
 
-# Consulta SQL (deve ser especificada a query desejada)
+# SQL query (the desired query should be specified here)
 query = """
-    -- A consulta SQL deve ser inserida aqui
+    -- The SQL query should be inserted here
 """
 
-cur.execute(query)  # Execução da consulta SQL
-resultado_base = cur.fetchall()  # Recuperação dos resultados da consulta
-print("Query executada e encaminhada")
+cur.execute(query)  # Execute the SQL query
+resultado_base = cur.fetchall()  # Fetch the query results
+print("Query executed and fetched")
 
-cur.close()  # Fechamento do cursor
-conn.close()  # Fechamento da conexão com o banco de dados
-print("Conexão do banco fechada e cursor também")
+cur.close()  # Close the cursor
+conn.close()  # Close the database connection
+print("Database connection and cursor closed")
 
-# Conversão dos resultados da consulta para um DataFrame do pandas
-df = pd.DataFrame(resultado_base, columns=['nome', 'id_contrato', 'id_fatura', 'valor'])
-print("Arquivo em formato para encaminhar no drive")
+# Convert query results to a Pandas DataFrame
+df = pd.DataFrame(resultado_base, columns=['name', 'contract_id', 'invoice_id', 'amount'])
+print("File formatted for upload to drive")
 
-# Obtenção da data atual para nomear o arquivo
-data_atual = datetime.now()
+# Get current date for naming the file
+current_date = datetime.now()
 
-# Salvamento do DataFrame em um arquivo Excel
-df.to_excel(f'bot/backup_base/BOT REPORT (0{data_atual.day}.0{data_atual.month}.{data_atual.year}).xlsx', engine='openpyxl', header=True, index=False)
-print("Colocada a data exata do arquivo e transformando para excel.")
+# Save the DataFrame to an Excel file
+df.to_excel(f'bot/backup_base/BOT REPORT ({current_date.day:02d}.{current_date.month:02d}.{current_date.year}).xlsx', engine='openpyxl', header=True, index=False)
+print("Exact date added to the file and converted to Excel.")
 
-# Autenticação com o Google Drive usando a conta de serviço
-credentials = Credentials.from_service_account_file(r'/home/usuario/Área de trabalho/iaf_report/base_de_cobranca/projetos-pessoais-420412-e977e871ee92.json')
+# Authenticate with Google Drive using the service account
+credentials = Credentials.from_service_account_file(r'/home/user/Desktop/iaf_report/billing_database/personal_projects-420412-e977e871ee92.json')
 drive = build('drive', 'v3', credentials=credentials)
-print("Credencial aceita")
+print("Credentials accepted")
 
-# Identificação do último arquivo modificado na pasta atual
-file_path = glob.glob("*")  # Busca por todos os arquivos na pasta atual
-ultimo_arquivo = max(file_path, key=os.path.getatime)  # Seleção do arquivo mais recentemente acessado/modificado
-print("Pegando ultimo arquivo")
+# Identify the most recently modified file in the current folder
+file_path = glob.glob("*")  # Search for all files in the current folder
+latest_file = max(file_path, key=os.path.getatime)  # Select the most recently accessed/modified file
+print("Fetching latest file")
 
-# Preparação para upload do arquivo ao Google Drive
-file_name = os.path.basename(ultimo_arquivo)  # Obtenção do nome do arquivo
-folder_id = ''  # ID da pasta do Google Drive onde o arquivo será armazenado (deve ser especificado)
-file_metadata = {'name': file_name, 'id': folder_id}  # Metadados do arquivo para o Google Drive
-media = MediaFileUpload(ultimo_arquivo, resumable=True)  # Preparação do arquivo para upload
+# Prepare to upload the file to Google Drive
+file_name = os.path.basename(latest_file)  # Get the file name
+folder_id = ''  # ID of the Google Drive folder where the file will be stored (should be specified)
+file_metadata = {'name': file_name, 'id': folder_id}  # File metadata for Google Drive
+media = MediaFileUpload(latest_file, resumable=True)  # Prepare the file for upload
 
-# Upload do arquivo para o Google Drive
-file_drive = drive.files().create(body=file_metadata, media_body=media, fields='1fTLQ-v_NUPnXsXjZeTGs5RA0O7UCQZkH').execute()
-print("Verificar se subiu pra produção")
+# Upload the file to Google Drive
+file_drive = drive.files().create(body=file_metadata, media_body=media, fields='id').execute()
+print("Check if uploaded to production")
 
-# Concessão de permissão de leitura para qualquer pessoa
+# Grant read permission to anyone with the link
 drive.permissions().create(fileId=file_drive['id'], body={'type': 'anyone', 'role': 'reader'}).execute()
 
-# Créditos para Iago Longen Mendonça, desenvolvedor desse bot
-print("Créditos para Iago Longen Mendonça, desenvolvedor desse bot")
+# Credits to Iago Longen Mendonça, developer of this bot
+print("Credits to Iago Longen Mendonça, developer of this bot")
