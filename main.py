@@ -23,7 +23,7 @@ query = """
 """
 
 cur.execute(query)  # Execute the SQL query
-resultado_base = cur.fetchall()  # Fetch the query results
+result = cur.fetchall()  # Fetch the query results
 print("Query executed and fetched")
 
 cur.close()  # Close the cursor
@@ -31,7 +31,7 @@ conn.close()  # Close the database connection
 print("Database connection and cursor closed")
 
 # Convert query results to a Pandas DataFrame
-df = pd.DataFrame(resultado_base, columns=['name', 'contract_id', 'invoice_id', 'amount'])
+df = pd.DataFrame(result, columns=['name', 'contract_id', 'invoice_id', 'amount'])
 print("File formatted for upload to drive")
 
 # Get current date for naming the file
