@@ -38,11 +38,11 @@ print("File formatted for upload to drive")
 current_date = datetime.now()
 
 # Save the DataFrame to an Excel file
-df.to_excel(f'bot/backup_base/BOT REPORT ({current_date.day:02d}.{current_date.month:02d}.{current_date.year}).xlsx', engine='openpyxl', header=True, index=False)
+df.to_excel(f'bot/BOT REPORT ({current_date.day:02d}.{current_date.month:02d}.{current_date.year}).xlsx', engine='openpyxl', header=True, index=False)
 print("Exact date added to the file and converted to Excel.")
 
 # Authenticate with Google Drive using the service account
-credentials = Credentials.from_service_account_file(r'/home/user/Desktop/iaf_report/billing_database/personal_projects-420412-e977e871ee92.json')
+credentials = Credentials.from_service_account_file(r'')
 drive = build('drive', 'v3', credentials=credentials)
 print("Credentials accepted")
 
